@@ -91,5 +91,29 @@ with open(nextflow_path) as nextflow_file:
             doc_yaml = doc_yaml + nextflow_lines[i].replace(DOC_STARTER, "")
         docstrings[proc_type][proc_name] = yaml.safe_load(doc_yaml)
 
-    # Display the results so far
-    print(docstrings)
+    # Create any array to return from the plugin
+    return_nodes = []
+
+    # Try to convert each definition to a node
+    for block_type, block_docs in docstrings.items():
+        block_section = nodes.section()
+        block_section += nodes.title(text=block_type)
+        for proc_name, proc_docs in block_docs.items():
+            proc_section = nodes.section()
+            proc_section += nodes.title(text=proc_name)
+            proc_section += nodes.paragraph(text=proc_docs["summary"])
+            io_methods = ["input", "output"]
+            for met in io_methods:
+                if met in proc_docs.keys():
+                    io_section = nodes.section()
+                    io_section += nodes.title(text=met)
+                    io_list = nodes.bullet_list()
+                    for io in proc_docs[met]:
+                        io_list += params_to_list(io)
+                    io_section += io_list
+                    proc_section += io_section
+            block_section += proc_section
+
+        return_nodes.append(block_section)
+
+    print(return_nodes)
