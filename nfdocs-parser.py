@@ -57,9 +57,11 @@ with open(nextflow_path) as nextflow_file:
                 docstring_positions.append(range(doc_start, doc_end))
 
     # Create dictionaries for each of the block types
-    workflow_docstrings = dict()
-    process_docstrings = dict()
-    function_docstrings = dict()
+    docstrings = {
+        "process": {},
+        "workflow": {},
+        "function": {}
+    }
 
     # Parse out the docstrings and put them in the appropriate dictionary
     for pos in docstring_positions:
@@ -67,12 +69,7 @@ with open(nextflow_path) as nextflow_file:
         doc_yaml = ""
         for i in pos:
             doc_yaml = doc_yaml + nextflow_lines[i].replace(DOC_STARTER, "")
-        if proc_type == "process":
-            process_docstrings[proc_name] = yaml.load(doc_yaml, Loader=yaml.SafeLoader)
-        elif proc_type == "function":
-            function_docstrings[proc_name] = yaml.load(doc_yaml, Loader=yaml.SafeLoader)
-        elif proc_type == "workflow":
-            workflow_docstrings[proc_name] = yaml.load(doc_yaml, Loader=yaml.SafeLoader)
+        docstrings[proc_type][proc_name] = yaml.safe_load(doc_yaml)
 
     # Display the results so far
-    print(process_docstrings)
+    print(docstrings)
