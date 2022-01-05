@@ -4,6 +4,26 @@ import sys
 # Declare the docstring starting characters
 DOC_STARTER = "/// "
 
+def definition_type(signature):
+    # Returns "name", workflow|process|function
+    def_type = "unknown"
+    if "workflow" in signature:
+        def_type = "workflow"
+    elif "process" in signature:
+        def_type = "process"
+    elif "function" in signature:
+        def_type = "function"
+
+    # Check if any signature was recognized
+    if def_type == "unknown":
+        return "unknown", "an error occurred"
+
+    # Parse out the definition name
+    def_name = signature.replace(def_type, "").replace("{", "").strip()
+
+    # Return the results
+    return def_name, def_type
+
 # Take path as single argument for now
 nextflow_path = sys.argv[1]
 with open(nextflow_path) as nextflow_file:
@@ -37,3 +57,4 @@ with open(nextflow_path) as nextflow_file:
 
     # Display the results so far
     print(docstring_positions)
+    print(definition_type(nextflow_lines[docstring_positions[0][-1]+2]))
