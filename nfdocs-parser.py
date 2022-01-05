@@ -2,118 +2,121 @@
 import sys
 import yaml
 from docutils import nodes
+from docutils.parsers.rst import Directive
 
-# Declare the docstring starting characters
-DOC_STARTER = "/// "
+class NFDocs(Directive):
 
-def definition_type(signature):
-    # Returns "name", workflow|process|function
-    def_type = "unknown"
-    if "workflow" in signature:
-        def_type = "workflow"
-    elif "process" in signature:
-        def_type = "process"
-    elif "function" in signature:
-        def_type = "function"
+    # Declare the docstring starting characters
+    DOC_STARTER = "/// "
 
-    # Check if any signature was recognized
-    if def_type == "unknown":
-        return "unknown", "an error occurred"
+    def definition_type(signature):
+        # Returns "name", workflow|process|function
+        def_type = "unknown"
+        if "workflow" in signature:
+            def_type = "workflow"
+        elif "process" in signature:
+            def_type = "process"
+        elif "function" in signature:
+            def_type = "function"
 
-    # Parse out the definition name
-    def_name = signature.replace(def_type, "").replace("{", "").strip()
+        # Check if any signature was recognized
+        if def_type == "unknown":
+            return "unknown", "an error occurred"
 
-    # Return the results
-    return def_name, def_type
+        # Parse out the definition name
+        def_name = signature.replace(def_type, "").replace("{", "").strip()
 
-def params_to_list(params):
-    if "tuple" in params.keys():
-        tuple_item = nodes.list_item()
-        if "name" in params.keys():
-            tuple_item += nodes.paragraph(text=params["name"])
-        tuple_item += nodes.paragraph(text="Tuple:")
-        tuple_list = nodes.bullet_list()
-        for io in params["tuple"]:
-            tuple_list += params_to_list(io)
-        tuple_item += tuple_list
-        return tuple_item
-    else:
-        io_item = nodes.list_item()
-        if "name" in params.keys():
-            io_item += nodes.paragraph(text=params["name"])
-        io_item += nodes.paragraph(text=f"Type: {params['type']}")
-        io_item += nodes.paragraph(text=params["description"])
-        return io_item
+        # Return the results
+        return def_name, def_type
 
-# Take path as single argument for now
-nextflow_path = sys.argv[1]
-with open(nextflow_path) as nextflow_file:
+    def params_to_list(params):
+        if "tuple" in params.keys():
+            tuple_item = nodes.list_item()
+            if "name" in params.keys():
+                tuple_item += nodes.paragraph(text=params["name"])
+            tuple_item += nodes.paragraph(text="Tuple:")
+            tuple_list = nodes.bullet_list()
+            for io in params["tuple"]:
+                tuple_list += params_to_list(io)
+            tuple_item += tuple_list
+            return tuple_item
+        else:
+            io_item = nodes.list_item()
+            if "name" in params.keys():
+                io_item += nodes.paragraph(text=params["name"])
+            io_item += nodes.paragraph(text=f"Type: {params['type']}")
+            io_item += nodes.paragraph(text=params["description"])
+            return io_item
 
-    # Split by lines
-    nextflow_lines = nextflow_file.readlines()
+    # Take path as single argument for now
+    nextflow_path = sys.argv[1]
+    with open(nextflow_path) as nextflow_file:
 
-    # Declare some variables to keep track of where the docstrings begin and end
-    doc_start = 0
-    doc_end = 0
+        # Split by lines
+        nextflow_lines = nextflow_file.readlines()
 
-    # Declare dictionaries to keep track of the docstrings
-    docstring_positions = []
+        # Declare some variables to keep track of where the docstrings begin and end
+        doc_start = 0
+        doc_end = 0
 
-    # Calculate the start and end positions of each docstring
-    for i, line in enumerate(nextflow_lines):
-        # Check if this is a docstring
-        if line.startswith(DOC_STARTER):
-            # It is: check the next and previous lines to see if this is part of a block
-            line_previous = nextflow_lines[i-1]
-            line_next = nextflow_lines[i+1]
-            if not line_previous.startswith(DOC_STARTER):
-                doc_start = i
-            if not line_next.startswith(DOC_STARTER):
-                doc_end = i
+        # Declare dictionaries to keep track of the docstrings
+        docstring_positions = []
 
-            # Check if we've reached the end of a docstring block
-            if doc_end == i:
-                # Add this docstring position to the array
-                docstring_positions.append(range(doc_start, doc_end+1))
+        # Calculate the start and end positions of each docstring
+        for i, line in enumerate(nextflow_lines):
+            # Check if this is a docstring
+            if line.startswith(DOC_STARTER):
+                # It is: check the next and previous lines to see if this is part of a block
+                line_previous = nextflow_lines[i-1]
+                line_next = nextflow_lines[i+1]
+                if not line_previous.startswith(DOC_STARTER):
+                    doc_start = i
+                if not line_next.startswith(DOC_STARTER):
+                    doc_end = i
 
-    # Create dictionaries for each of the block types
-    docstrings = {
-        "process": {},
-        "workflow": {},
-        "function": {}
-    }
+                # Check if we've reached the end of a docstring block
+                if doc_end == i:
+                    # Add this docstring position to the array
+                    docstring_positions.append(range(doc_start, doc_end+1))
 
-    # Parse out the docstrings and put them in the appropriate dictionary
-    for pos in docstring_positions:
-        proc_name, proc_type = definition_type(nextflow_lines[pos[-1]+1])
-        doc_yaml = ""
-        for i in pos:
-            doc_yaml = doc_yaml + nextflow_lines[i].replace(DOC_STARTER, "")
-        docstrings[proc_type][proc_name] = yaml.safe_load(doc_yaml)
+        # Create dictionaries for each of the block types
+        docstrings = {
+            "process": {},
+            "workflow": {},
+            "function": {}
+        }
 
-    # Create any array to return from the plugin
-    return_nodes = []
+        # Parse out the docstrings and put them in the appropriate dictionary
+        for pos in docstring_positions:
+            proc_name, proc_type = definition_type(nextflow_lines[pos[-1]+1])
+            doc_yaml = ""
+            for i in pos:
+                doc_yaml = doc_yaml + nextflow_lines[i].replace(DOC_STARTER, "")
+            docstrings[proc_type][proc_name] = yaml.safe_load(doc_yaml)
 
-    # Try to convert each definition to a node
-    for block_type, block_docs in docstrings.items():
-        block_section = nodes.section()
-        block_section += nodes.title(text=block_type)
-        for proc_name, proc_docs in block_docs.items():
-            proc_section = nodes.section()
-            proc_section += nodes.title(text=proc_name)
-            proc_section += nodes.paragraph(text=proc_docs["summary"])
-            io_methods = ["input", "output"]
-            for met in io_methods:
-                if met in proc_docs.keys():
-                    io_section = nodes.section()
-                    io_section += nodes.title(text=met)
-                    io_list = nodes.bullet_list()
-                    for io in proc_docs[met]:
-                        io_list += params_to_list(io)
-                    io_section += io_list
-                    proc_section += io_section
-            block_section += proc_section
+        # Create any array to return from the plugin
+        return_nodes = []
 
-        return_nodes.append(block_section)
+        # Try to convert each definition to a node
+        for block_type, block_docs in docstrings.items():
+            block_section = nodes.section()
+            block_section += nodes.title(text=block_type)
+            for proc_name, proc_docs in block_docs.items():
+                proc_section = nodes.section()
+                proc_section += nodes.title(text=proc_name)
+                proc_section += nodes.paragraph(text=proc_docs["summary"])
+                io_methods = ["input", "output"]
+                for met in io_methods:
+                    if met in proc_docs.keys():
+                        io_section = nodes.section()
+                        io_section += nodes.title(text=met)
+                        io_list = nodes.bullet_list()
+                        for io in proc_docs[met]:
+                            io_list += params_to_list(io)
+                        io_section += io_list
+                        proc_section += io_section
+                block_section += proc_section
 
-    print(return_nodes)
+            return_nodes.append(block_section)
+
+        print(return_nodes)
