@@ -38,7 +38,6 @@ def params_to_list(params):
         tuple_item += tuple_list
         return tuple_item
     else:
-        print(params)
         io_item = nodes.list_item()
         if "name" in params.keys():
             io_item += nodes.paragraph(text=params["name"])
