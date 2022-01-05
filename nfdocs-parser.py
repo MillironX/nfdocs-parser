@@ -68,11 +68,11 @@ with open(nextflow_path) as nextflow_file:
         for i in pos:
             doc_yaml = doc_yaml + nextflow_lines[i].replace(DOC_STARTER, "")
         if proc_type == "process":
-            process_docstrings[proc_name] = yaml.load(doc_yaml)
+            process_docstrings[proc_name] = yaml.load(doc_yaml, Loader=yaml.SafeLoader)
         elif proc_type == "function":
-            function_docstrings[proc_name] = yaml.load(doc_yaml)
+            function_docstrings[proc_name] = yaml.load(doc_yaml, Loader=yaml.SafeLoader)
         elif proc_type == "workflow":
-            workflow_docstrings[proc_name] = yaml.load(doc_yaml)
+            workflow_docstrings[proc_name] = yaml.load(doc_yaml, Loader=yaml.SafeLoader)
 
     # Display the results so far
     print(process_docstrings)
