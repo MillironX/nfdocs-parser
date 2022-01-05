@@ -27,7 +27,10 @@ def definition_type(signature):
 
 def params_to_list(params):
     if "tuple" in params.keys():
-        tuple_item = nodes.list_item(text="tuple")
+        tuple_item = nodes.list_item()
+        if "name" in params.keys():
+            tuple_item += nodes.paragraph(text=params["name"])
+        tuple_item += nodes.paragraph(text="Tuple:")
         tuple_list = nodes.bullet_list()
         for io in params["tuple"]:
             tuple_list += params_to_list(io)
