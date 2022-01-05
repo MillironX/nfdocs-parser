@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import yaml
 
 # Declare the docstring starting characters
 DOC_STARTER = "/// "
@@ -55,6 +56,23 @@ with open(nextflow_path) as nextflow_file:
                 # Add this docstring position to the array
                 docstring_positions.append(range(doc_start, doc_end))
 
+    # Create dictionaries for each of the block types
+    workflow_docstrings = dict()
+    process_docstrings = dict()
+    function_docstrings = dict()
+
+    # Parse out the docstrings and put them in the appropriate dictionary
+    for pos in docstring_positions:
+        proc_name, proc_type = definition_type(nextflow_lines[pos[-1]+2])
+        doc_yaml = ""
+        for i in pos:
+            doc_yaml = doc_yaml + nextflow_lines[i].replace(DOC_STARTER, "")
+        if proc_type == "process":
+            process_docstrings[proc_name] = yaml.load(doc_yaml)
+        elif proc_type == "function":
+            function_docstrings[proc_name] = yaml.load(doc_yaml)
+        elif proc_type == "workflow":
+            workflow_docstrings[proc_name] = yaml.load(doc_yaml)
+
     # Display the results so far
-    print(docstring_positions)
-    print(definition_type(nextflow_lines[docstring_positions[0][-1]+2]))
+    print(process_docstrings)
