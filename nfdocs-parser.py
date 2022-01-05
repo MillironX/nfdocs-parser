@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import yaml
+from docutils import nodes
 
 # Declare the docstring starting characters
 DOC_STARTER = "/// "
@@ -37,8 +38,13 @@ def params_to_list(params):
         tuple_item += tuple_list
         return tuple_item
     else:
-        return nodes.list_item(text="not tuple")
-    print("not yet implemented")
+        print(params)
+        io_item = nodes.list_item()
+        if "name" in params.keys():
+            io_item += nodes.paragraph(text=params["name"])
+        io_item += nodes.paragraph(text=f"Type: {params['type']}")
+        io_item += nodes.paragraph(text=params["description"])
+        return io_item
 
 # Take path as single argument for now
 nextflow_path = sys.argv[1]
