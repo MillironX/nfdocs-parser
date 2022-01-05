@@ -25,6 +25,18 @@ def definition_type(signature):
     # Return the results
     return def_name, def_type
 
+def params_to_list(params):
+    if "tuple" in params.keys():
+        tuple_item = nodes.list_item(text="tuple")
+        tuple_list = nodes.bullet_list()
+        for io in params["tuple"]:
+            tuple_list += params_to_list(io)
+        tuple_item += tuple_list
+        return tuple_item
+    else:
+        return nodes.list_item(text="not tuple")
+    print("not yet implemented")
+
 # Take path as single argument for now
 nextflow_path = sys.argv[1]
 with open(nextflow_path) as nextflow_file:
