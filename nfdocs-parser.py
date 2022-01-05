@@ -66,7 +66,7 @@ with open(nextflow_path) as nextflow_file:
             # Check if we've reached the end of a docstring block
             if doc_end == i:
                 # Add this docstring position to the array
-                docstring_positions.append(range(doc_start, doc_end))
+                docstring_positions.append(range(doc_start, doc_end+1))
 
     # Create dictionaries for each of the block types
     docstrings = {
@@ -77,7 +77,7 @@ with open(nextflow_path) as nextflow_file:
 
     # Parse out the docstrings and put them in the appropriate dictionary
     for pos in docstring_positions:
-        proc_name, proc_type = definition_type(nextflow_lines[pos[-1]+2])
+        proc_name, proc_type = definition_type(nextflow_lines[pos[-1]+1])
         doc_yaml = ""
         for i in pos:
             doc_yaml = doc_yaml + nextflow_lines[i].replace(DOC_STARTER, "")
