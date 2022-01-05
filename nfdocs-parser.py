@@ -123,3 +123,9 @@ class NFDocs(Directive):
                 return_nodes.append(block_section)
 
             return return_nodes
+
+def setup(app):
+    app.add_directive('nfdocs', NFDocs)
+    return {
+        "version": "0.1.0"
+    }
