@@ -11,7 +11,7 @@ class NFDocs(Directive):
     # Declare the docstring starting characters
     DOC_STARTER = "/// "
 
-    def definition_type(signature):
+    def definition_type(self, signature):
         # Returns "name", workflow|process|function
         def_type = "unknown"
         if "workflow" in signature:
@@ -31,7 +31,7 @@ class NFDocs(Directive):
         # Return the results
         return def_name, def_type
 
-    def params_to_list(params):
+    def params_to_list(self, params):
         if "tuple" in params.keys():
             tuple_item = nodes.list_item()
             if "name" in params.keys():
