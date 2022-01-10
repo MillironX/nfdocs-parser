@@ -185,14 +185,8 @@ class NFDocs(Directive):
                 io_methods = ["input", "output"]
                 for met in io_methods:
                     if met in proc_docs.keys():
-                        io_section = nodes.section()
-                        io_section += nodes.title(text=met)
-                        io_list = nodes.bullet_list()
-                        for io in proc_docs[met]:
-                            io_list += params_to_list(io)
-                        io_section += io_list
-                        proc_section += io_section
-                        self.state_machine.document.note_implicit_target(io_section)
+                        io_table = params_to_table(met, proc_docs[met])
+                        proc_section += io_table
                 self.state_machine.document.note_implicit_target(proc_section)
                 block_section += proc_section
 
