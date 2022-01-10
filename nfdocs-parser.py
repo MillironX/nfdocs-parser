@@ -54,7 +54,7 @@ def params_to_table(type, params):
         if "tuple" in param.keys():
             # Tuple title
             param_name_entry = nodes.entry()
-            param_name_entry += nodes.Text("Tuple")
+            param_name_entry += nodes.strong(text="Tuple")
             param_row += param_name_entry
 
             # Params table
@@ -74,7 +74,8 @@ def params_to_table(type, params):
             # Parameter title
             param_name_entry = nodes.entry()
             if "name" in param.keys():
-                param_name_entry += nodes.Text(f"{param['name']}({param['type']})")
+                param_name_entry += nodes.strong(text=param["name"])
+                param_name_entry += nodes.Text(f"({param['type']})")
             else:
                 param_name_entry += nodes.Text(param["type"])
             param_row += param_name_entry
