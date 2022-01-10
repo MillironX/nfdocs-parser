@@ -26,76 +26,6 @@ def definition_type(signature):
     # Return the results
     return def_name, def_type
 
-def params_to_table(type, params):
-    # Create a table
-    params_table = nodes.table()
-    if type:
-        params_table += nodes.title(text=type.capitalize())
-
-    # Make it two columns wide
-    params_tgroup = nodes.tgroup(cols=2)
-    for _ in range(2):
-        colspec = nodes.colspec(colwidth=1)
-        params_tgroup.append(colspec)
-
-    # Create the row definitions
-    params_rows = []
-
-    for param in params:
-        # Create a new row
-        param_row = nodes.row()
-
-        # If this parameter is a tuple, the new row takes on the form
-        # +-------+------------------+
-        # |       | +--------------+ |
-        # | Tuple | | Params Table | |
-        # |       | +--------------+ |
-        # +-------+------------------+
-        # via recursion
-        if "tuple" in param.keys():
-            # Tuple title
-            param_name_entry = nodes.entry()
-            param_name_entry += nodes.strong(text="Tuple")
-            param_row += param_name_entry
-
-            # Params table
-            sub_params_entry = nodes.entry()
-            sub_params_entry += params_to_table("", param["tuple"])
-            param_row += sub_params_entry
-
-        # If this is actually a parameter, the new row takes on the form
-        # +------------+-------------+
-        # | Name(Type) | Description |
-        # +------------+-------------+
-        # or
-        # +------+-------------+
-        # | Type | Description |
-        # +------+-------------+
-        else:
-            # Parameter title
-            param_name_entry = nodes.entry()
-            if "name" in param.keys():
-                param_name_entry += nodes.strong(text=param["name"])
-                param_name_entry += nodes.Text(f"({param['type']})")
-            else:
-                param_name_entry += nodes.Text(param["type"])
-            param_row += param_name_entry
-
-            # Parameter description
-            param_description_entry = nodes.entry()
-            param_description_entry += nodes.paragraph(text=param["description"])
-            param_row += param_description_entry
-
-        # Add this row to the vector
-        params_rows.append(param_row)
-
-    # Convert the rows to a table
-    params_table_body = nodes.tbody()
-    params_table_body.extend(params_rows)
-    params_tgroup += params_table_body
-    params_table += params_tgroup
-    return params_table
-
 class NFDocs(Directive):
     # Class default overrides
     required_arguments = 1
@@ -104,6 +34,76 @@ class NFDocs(Directive):
     DOC_STARTER = "/// "
 
     pe = inflect.engine()
+
+    def params_to_table(self, type, params):
+        # Create a table
+        params_table = nodes.table()
+        if type:
+            params_table += nodes.title(text=type.capitalize())
+
+        # Make it two columns wide
+        params_tgroup = nodes.tgroup(cols=2)
+        for _ in range(2):
+            colspec = nodes.colspec(colwidth=1)
+            params_tgroup.append(colspec)
+
+        # Create the row definitions
+        params_rows = []
+
+        for param in params:
+            # Create a new row
+            param_row = nodes.row()
+
+            # If this parameter is a tuple, the new row takes on the form
+            # +-------+------------------+
+            # |       | +--------------+ |
+            # | Tuple | | Params Table | |
+            # |       | +--------------+ |
+            # +-------+------------------+
+            # via recursion
+            if "tuple" in param.keys():
+                # Tuple title
+                param_name_entry = nodes.entry()
+                param_name_entry += nodes.strong(text="Tuple")
+                param_row += param_name_entry
+
+                # Params table
+                sub_params_entry = nodes.entry()
+                sub_params_entry += self.params_to_table("", param["tuple"])
+                param_row += sub_params_entry
+
+            # If this is actually a parameter, the new row takes on the form
+            # +------------+-------------+
+            # | Name(Type) | Description |
+            # +------------+-------------+
+            # or
+            # +------+-------------+
+            # | Type | Description |
+            # +------+-------------+
+            else:
+                # Parameter title
+                param_name_entry = nodes.entry()
+                if "name" in param.keys():
+                    param_name_entry += nodes.strong(text=param["name"])
+                    param_name_entry += nodes.Text(f"({param['type']})")
+                else:
+                    param_name_entry += nodes.Text(param["type"])
+                param_row += param_name_entry
+
+                # Parameter description
+                param_description_entry = nodes.entry()
+                param_description_entry += nodes.paragraph(text=param["description"])
+                param_row += param_description_entry
+
+            # Add this row to the vector
+            params_rows.append(param_row)
+
+        # Convert the rows to a table
+        params_table_body = nodes.tbody()
+        params_table_body.extend(params_rows)
+        params_tgroup += params_table_body
+        params_table += params_tgroup
+        return params_table
 
     def run(self):
         # Take path as single argument for now
@@ -172,7 +172,7 @@ class NFDocs(Directive):
                     io_methods = ["input", "output"]
                     for met in io_methods:
                         if met in proc_docs.keys():
-                            io_table = params_to_table(met, proc_docs[met])
+                            io_table = self.params_to_table(met, proc_docs[met])
                             proc_section += io_table
                     self.state_machine.document.note_implicit_target(proc_section)
                     block_section += proc_section
