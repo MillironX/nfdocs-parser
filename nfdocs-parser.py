@@ -122,7 +122,6 @@ class NFDocs(Directive):
                     self.state_machine.document.note_implicit_target(proc_section)
                     block_section += proc_section
 
-                print(block_section)
                 self.state_machine.document.note_implicit_target(block_section)
                 return_nodes.append(block_section)
 
