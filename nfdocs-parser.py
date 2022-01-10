@@ -5,32 +5,32 @@ from docutils import nodes
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives
 
+def definition_type(signature):
+    # Returns "name", workflow|process|function
+    def_type = "unknown"
+    if "workflow" in signature:
+        def_type = "workflow"
+    elif "process" in signature:
+        def_type = "process"
+    elif "function" in signature:
+        def_type = "function"
+
+    # Check if any signature was recognized
+    if def_type == "unknown":
+        return "unknown", "an error occurred"
+
+    # Parse out the definition name
+    def_name = signature.replace(def_type, "").replace("{", "").strip()
+
+    # Return the results
+    return def_name, def_type
+
 class NFDocs(Directive):
     # Class default overrides
     required_arguments = 1
 
     # Declare the docstring starting characters
     DOC_STARTER = "/// "
-
-    def definition_type(self, signature):
-        # Returns "name", workflow|process|function
-        def_type = "unknown"
-        if "workflow" in signature:
-            def_type = "workflow"
-        elif "process" in signature:
-            def_type = "process"
-        elif "function" in signature:
-            def_type = "function"
-
-        # Check if any signature was recognized
-        if def_type == "unknown":
-            return "unknown", "an error occurred"
-
-        # Parse out the definition name
-        def_name = signature.replace(def_type, "").replace("{", "").strip()
-
-        # Return the results
-        return def_name, def_type
 
     def params_to_list(self, params):
         if "tuple" in params.keys():
@@ -100,7 +100,7 @@ class NFDocs(Directive):
 
                         # Parse out the docstrings and put them in the appropriate dictionary
                         for pos in docstring_positions:
-                            proc_name, proc_type = self.definition_type(nextflow_lines[pos[-1]+1])
+                            proc_name, proc_type = definition_type(nextflow_lines[pos[-1]+1])
                             doc_yaml = ""
                             for i in pos:
                                 doc_yaml = doc_yaml + nextflow_lines[i].replace(self.DOC_STARTER, "")
