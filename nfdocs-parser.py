@@ -28,7 +28,8 @@ def definition_type(signature):
 def params_to_table(type, params):
     # Create a table
     params_table = nodes.table()
-    params_table += nodes.title(text=type)
+    if type:
+        params_table += nodes.title(text=type)
 
     # Make it two columns wide
     params_tgroup = nodes.tgroup(cols=2)
