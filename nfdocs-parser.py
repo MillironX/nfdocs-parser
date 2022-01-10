@@ -29,7 +29,7 @@ def params_to_table(type, params):
     # Create a table
     params_table = nodes.table()
     if type:
-        params_table += nodes.title(text=type)
+        params_table += nodes.title(text=type.capitalize())
 
     # Make it two columns wide
     params_tgroup = nodes.tgroup(cols=2)
@@ -160,7 +160,7 @@ class NFDocs(Directive):
         # Try to convert each definition to a node
         for block_type, block_docs in docstrings.items():
             block_section = nodes.section()
-            block_section += nodes.title(text=block_type)
+            block_section += nodes.title(text=block_type.capitalize())
             for proc_name, proc_docs in block_docs.items():
                 proc_section = nodes.section()
                 proc_section += nodes.title(text=proc_name)
