@@ -112,8 +112,8 @@ class NFDocs(Directive):
 
         # Create dictionaries for each of the block types
         docstrings = {
-            "process": {},
             "workflow": {},
+            "process": {},
             "function": {}
         }
 
