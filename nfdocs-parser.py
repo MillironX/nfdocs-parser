@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import inflect
 import os
 import yaml
 from docutils import nodes
@@ -102,6 +103,8 @@ class NFDocs(Directive):
     # Declare the docstring starting characters
     DOC_STARTER = "/// "
 
+    pe = inflect.engine()
+
     def run(self):
         # Take path as single argument for now
         nextflow_path = self.arguments[0]
@@ -161,7 +164,7 @@ class NFDocs(Directive):
         for block_type, block_docs in docstrings.items():
             if len(block_docs) > 0:
                 block_section = nodes.section()
-                block_section += nodes.title(text=block_type.capitalize())
+                block_section += nodes.title(text=self.pe.plural(block_type.capitalize(), len(block_docs)))
                 for proc_name, proc_docs in block_docs.items():
                     proc_section = nodes.section()
                     proc_section += nodes.title(text=proc_name)
