@@ -59,7 +59,7 @@ def params_to_table(type, params):
 
             # Params table
             sub_params_entry = nodes.entry()
-            sub_params_entry += params_to_table("Tuple", param["tuple"])
+            sub_params_entry += params_to_table("", param["tuple"])
             param_row += sub_params_entry
 
         # If this is actually a parameter, the new row takes on the form
