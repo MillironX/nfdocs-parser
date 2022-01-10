@@ -118,8 +118,12 @@ class NFDocs(Directive):
                                 io_list += self.params_to_list(io)
                             io_section += io_list
                             proc_section += io_section
+                            self.state_machine.document.note_implicit_target(io_section)
+                    self.state_machine.document.note_implicit_target(proc_section)
                     block_section += proc_section
 
+                print(block_section)
+                self.state_machine.document.note_implicit_target(block_section)
                 return_nodes.append(block_section)
 
             return return_nodes
