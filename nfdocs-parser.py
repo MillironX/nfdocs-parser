@@ -159,22 +159,23 @@ class NFDocs(Directive):
 
         # Try to convert each definition to a node
         for block_type, block_docs in docstrings.items():
-            block_section = nodes.section()
-            block_section += nodes.title(text=block_type.capitalize())
-            for proc_name, proc_docs in block_docs.items():
-                proc_section = nodes.section()
-                proc_section += nodes.title(text=proc_name)
-                proc_section += nodes.paragraph(text=proc_docs["summary"])
-                io_methods = ["input", "output"]
-                for met in io_methods:
-                    if met in proc_docs.keys():
-                        io_table = params_to_table(met, proc_docs[met])
-                        proc_section += io_table
-                self.state_machine.document.note_implicit_target(proc_section)
-                block_section += proc_section
+            if len(block_docs) > 0:
+                block_section = nodes.section()
+                block_section += nodes.title(text=block_type.capitalize())
+                for proc_name, proc_docs in block_docs.items():
+                    proc_section = nodes.section()
+                    proc_section += nodes.title(text=proc_name)
+                    proc_section += nodes.paragraph(text=proc_docs["summary"])
+                    io_methods = ["input", "output"]
+                    for met in io_methods:
+                        if met in proc_docs.keys():
+                            io_table = params_to_table(met, proc_docs[met])
+                            proc_section += io_table
+                    self.state_machine.document.note_implicit_target(proc_section)
+                    block_section += proc_section
 
-            self.state_machine.document.note_implicit_target(block_section)
-            return_nodes.append(block_section)
+                self.state_machine.document.note_implicit_target(block_section)
+                return_nodes.append(block_section)
 
         return return_nodes
 
