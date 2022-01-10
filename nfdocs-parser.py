@@ -25,25 +25,6 @@ def definition_type(signature):
     # Return the results
     return def_name, def_type
 
-def params_to_list(params):
-    if "tuple" in params.keys():
-        tuple_item = nodes.list_item()
-        if "name" in params.keys():
-            tuple_item += nodes.paragraph(text=params["name"])
-        tuple_item += nodes.paragraph(text="Tuple:")
-        tuple_list = nodes.bullet_list()
-        for io in params["tuple"]:
-            tuple_list += params_to_list(io)
-        tuple_item += tuple_list
-        return tuple_item
-    else:
-        io_item = nodes.list_item()
-        if "name" in params.keys():
-            io_item += nodes.paragraph(text=params["name"])
-        io_item += nodes.paragraph(text=f"Type: {params['type']}")
-        io_item += nodes.paragraph(text=params["description"])
-        return io_item
-
 def params_to_table(type, params):
     # Create a table
     params_table = nodes.table()
