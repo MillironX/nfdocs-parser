@@ -92,7 +92,9 @@ class NFDocs(Directive):
 
                 # Parameter description
                 param_description_entry = nodes.entry()
-                param_description_entry += nodes.paragraph(text=param["description"])
+                param_description = nodes.paragraph(text=param["description"])
+                self.state.nested_parse(self.content, self.content_offset, param_description)
+                param_description_entry += param_description
                 param_row += param_description_entry
 
             # Add this row to the vector
@@ -162,21 +164,34 @@ class NFDocs(Directive):
 
         # Try to convert each definition to a node
         for block_type, block_docs in docstrings.items():
+            # Check if there are any blocks of this type
             if len(block_docs) > 0:
+                # Create a new section for this type of block
                 block_section = nodes.section()
                 block_section += nodes.title(text=self.pe.plural(block_type.capitalize(), len(block_docs)))
-                for proc_name, proc_docs in block_docs.items():
+
+                # Sort the blocks alphabetically
+                sorted_block_docs = {key: val for key, val in sorted(block_docs.items(), key = lambda ele: ele[0])}
+
+                # Create a subsection for each block
+                for proc_name, proc_docs in sorted_block_docs.items():
+                    # Create the section and heading
                     proc_section = nodes.section()
                     proc_section += nodes.title(text=proc_name)
                     proc_section += nodes.paragraph(text=proc_docs["summary"])
+
+                    # Create the io tables
                     io_methods = ["input", "output"]
                     for met in io_methods:
                         if met in proc_docs.keys():
                             io_table = self.params_to_table(met, proc_docs[met])
                             proc_section += io_table
+
+                    # Add the block section to the parent node
                     self.state_machine.document.note_implicit_target(proc_section)
                     block_section += proc_section
 
+                # Add the type of block section to the document
                 self.state_machine.document.note_implicit_target(block_section)
                 return_nodes.append(block_section)
 
