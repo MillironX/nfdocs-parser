@@ -161,7 +161,11 @@ class NFDocs(Directive):
                             doc_yaml = ""
                             for i in pos:
                                 doc_yaml = doc_yaml + nextflow_lines[i].replace(self.DOC_STARTER, "")
-                            docstrings[proc_type][proc_name] = yaml.safe_load(doc_yaml)
+                            try:
+                                docstrings[proc_type][proc_name] = yaml.safe_load(doc_yaml)
+                            except:
+                                logger = logging.getLogger(__name__)
+                                logger.warning(f"Could not parse YAML for {proc_name}")
 
         # Try to convert each definition to a node
         for block_type, block_docs in docstrings.items():
@@ -206,5 +210,5 @@ class NFDocs(Directive):
 def setup(app):
     app.add_directive('nfdocs', NFDocs)
     return {
-        "version": "0.1.1"
+        "version": "0.1.2"
     }
