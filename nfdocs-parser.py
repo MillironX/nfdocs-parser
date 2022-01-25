@@ -165,7 +165,7 @@ class NFDocs(Directive):
                                 docstrings[proc_type][proc_name] = yaml.safe_load(doc_yaml)
                             except:
                                 logger = logging.getLogger(__name__)
-                                logger.warning(f"Could not parse YAML for {proc_name}")
+                                logger.warning(f"Could not parse YAML for {proc_name} ({f}:{pos})")
 
         # Try to convert each definition to a node
         for block_type, block_docs in docstrings.items():
