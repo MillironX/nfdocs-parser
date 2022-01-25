@@ -5,6 +5,7 @@ import yaml
 from docutils import nodes
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives
+from sphinx.util import logging
 
 def definition_type(signature):
     # Returns "name", workflow|process|function
@@ -175,17 +176,22 @@ class NFDocs(Directive):
 
                 # Create a subsection for each block
                 for proc_name, proc_docs in sorted_block_docs.items():
-                    # Create the section and heading
-                    proc_section = nodes.section()
-                    proc_section += nodes.title(text=proc_name)
-                    proc_section += nodes.paragraph(text=proc_docs["summary"])
+                    try:
+                        # Create the section and heading
+                        proc_section = nodes.section()
+                        proc_section += nodes.title(text=proc_name)
+                        proc_section += nodes.paragraph(text=proc_docs["summary"])
 
-                    # Create the io tables
-                    io_methods = ["input", "output"]
-                    for met in io_methods:
-                        if met in proc_docs.keys():
-                            io_table = self.params_to_table(met, proc_docs[met])
-                            proc_section += io_table
+                        # Create the io tables
+                        io_methods = ["input", "output"]
+                        for met in io_methods:
+                            if met in proc_docs.keys():
+                                io_table = self.params_to_table(met, proc_docs[met])
+                                proc_section += io_table
+                    except:
+                        logger = logging.getLogger(__name__)
+                        logger.warning(f"Could not write docs for {proc_name}")
+
 
                     # Add the block section to the parent node
                     self.state_machine.document.note_implicit_target(proc_section)
@@ -200,5 +206,5 @@ class NFDocs(Directive):
 def setup(app):
     app.add_directive('nfdocs', NFDocs)
     return {
-        "version": "0.1.0"
+        "version": "0.1.1"
     }
